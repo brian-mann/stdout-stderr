@@ -6,6 +6,9 @@ const debug = require('debug')('stdout-stderr-testing')
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
 
+console.log("process.type=", process.type)
+console.log("electron.version=", process.versions.electron)
+
 console.log('process.env.FORCE_COLOR=', process.env.FORCE_COLOR)
 
 debug('some debug output %o', { foo: 'bar', baz: true })
