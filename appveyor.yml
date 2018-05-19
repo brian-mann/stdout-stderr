@@ -5,7 +5,4 @@ environment:
 # Install scripts. (runs after repo cloning)
 install:
   - npm install
-
-# Post-install test scripts.
-test_script:
   - npm test
