@@ -7,8 +7,14 @@ const destPath = path.resolve('node_modules', 'cypress', 'dist', 'Cypress', 'res
 
 const nodeModules = path.resolve("node_modules")
 
-Promise.all([
-  fse.copy(appPath, destPath),
-  fse.copy(path.join(nodeModules, "supports-color"), path.join(destPath, "packages", "server", "node_modules", "supports-color")),
-  fse.copy(path.join(nodeModules, "log-symbols"), path.join(destPath, "packages", "server", "node_modules", "log-symbols"))
-])
+// Promise.all([
+//   fse.copy(appPath, destPath),
+//   fse.copy(
+//       path.join(nodeModules, "supports-color"),
+//       path.join(destPath, "packages", "server", "node_modules", "supports-color")
+//   ),
+//   fse.copy(
+//     path.join(nodeModules, "log-symbols"),
+//     path.join(destPath, "packages", "server", "node_modules", "log-symbols")
+//   )
+// ])
