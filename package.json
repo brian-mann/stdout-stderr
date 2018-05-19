@@ -1,7 +1,7 @@
 {
   "scripts": {
     "pretest": "node copy.js",
-    "test": "mocha cypress/integration/foo.js; mocha cypress/integration/foo.js --reporter nyan; cypress run; cypress run --reporter nyan",
+    "test": "mocha cypress/integration/foo.js && mocha cypress/integration/foo.js --reporter nyan && cypress run && cypress run --reporter nyan",
     "test2": "mocha cypress/integration/foo.js && node index.js && xvfb-maybe electron index.js"
   },
   "dependencies": {
