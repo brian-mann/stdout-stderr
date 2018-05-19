@@ -3,6 +3,8 @@ const execa = require('execa')
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
 
+console.log('process.env.FORCE_COLOR=', process.env.FORCE_COLOR)
+
 console.log('i am stdout 1')
 console.error('i am stderror 1')
 
