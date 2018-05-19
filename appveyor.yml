@@ -1,0 +1,11 @@
+environment:
+  # Test against the same version of Node.js version as included in Electron
+  nodejs_version: "8.2.1"
+
+# Install scripts. (runs after repo cloning)
+install:
+  - npm install
+
+# Post-install test scripts.
+test_script:
+  - npm test
