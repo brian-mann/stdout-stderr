@@ -1,4 +1,4 @@
-var Promise, _, cp, debug, exit, exit0, exitErr, path;
+var Promise, _, cp, exit, exit0, exitErr, log, path;
 
 require("./environment");
 
@@ -10,7 +10,7 @@ path = require("path");
 
 Promise = require("bluebird");
 
-debug = require('debug')('cypress:server:cypress');
+log = require('./log');
 
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
@@ -43,7 +43,7 @@ exit = function(code) {
   if (code == null) {
     code = 0;
   }
-  debug("about to exit with code", code);
+  log("about to exit with code", code);
   return process.exit(code);
 };
 
@@ -52,7 +52,7 @@ exit0 = function() {
 };
 
 exitErr = function(err) {
-  debug('exiting with err', err);
+  log('exiting with err', err);
   return require("./errors").log(err).then(function() {
     return exit(1);
   });
@@ -72,9 +72,9 @@ module.exports = {
             var cypressElectron, fn;
             cypressElectron = require("@packages/electron");
             fn = function(code) {
-              debug("electron finished with", code);
+              log("electron finished with", code);
               return resolve({
-                totalFailures: code
+                failures: code
               });
             };
             return cypressElectron.open(".", require("./util/args").toArray(options), fn);
@@ -94,11 +94,15 @@ module.exports = {
     require("./logger").info("starting desktop app", {
       args: argv
     });
+    log("starting cypress server");
     return require("./util/app_data").ensure().then((function(_this) {
       return function() {
         var mode, options;
         options = require("./util/args").toObject(argv);
         switch (false) {
+          case !options.removeIds:
+            options.mode = "removeIds";
+            break;
           case !options.version:
             options.mode = "version";
             break;
@@ -123,23 +127,36 @@ module.exports = {
           case options.exitWithCode == null:
             options.mode = "exitWithCode";
             break;
+          case !(options.record || options.ci):
+            options.mode = "record";
+            break;
           case !options.runProject:
-            options.mode = "run";
+            options.mode = "headless";
             break;
           default:
             if (options.mode == null) {
-              options.mode = "interactive";
+              options.mode = "headed";
             }
         }
         mode = options.mode;
         options = _.omit(options, "mode");
+        if (_.isArray(options.spec)) {
+          options.spec = options.spec[0];
+        }
         return _this.startInMode(mode, options);
       };
     })(this));
   },
   startInMode: function(mode, options) {
-    debug("start in mode %s with options %j", mode, options);
+    log("start in mode %s with options %j", mode, options);
     switch (mode) {
+      case "removeIds":
+        return require("./project").removeIds(options.projectPath).then(function(stats) {
+          if (stats == null) {
+            stats = {};
+          }
+          return console.log("Removed '" + stats.ids + "' ids from '" + stats.files + "' files.");
+        }).then(exit0)["catch"](exitErr);
       case "version":
         return require("./modes/pkg")(options).get("version").then(function(version) {
           return console.log(version);
@@ -157,19 +174,21 @@ module.exports = {
       case "clearLogs":
         return require("./gui/logs").clear().then(exit0)["catch"](exitErr);
       case "getKey":
-        return require("./project").getSecretKeyByPath(options.projectRoot).then(function(key) {
+        return require("./project").getSecretKeyByPath(options.projectPath).then(function(key) {
           return console.log(key);
         }).then(exit0)["catch"](exitErr);
       case "generateKey":
-        return require("./project").generateSecretKeyByPath(options.projectRoot).then(function(key) {
+        return require("./project").generateSecretKeyByPath(options.projectPath).then(function(key) {
           return console.log(key);
         }).then(exit0)["catch"](exitErr);
       case "exitWithCode":
         return require("./modes/exit")(options).then(exit)["catch"](exitErr);
-      case "run":
-        return this.runElectron(mode, options).get("totalFailures").then(exit)["catch"](exitErr);
-      case "interactive":
+      case "headless":
+        return this.runElectron(mode, options).get("failures").then(exit)["catch"](exitErr);
+      case "headed":
         return this.runElectron(mode, options);
+      case "record":
+        return this.runElectron(mode, options).get("failures").then(exit)["catch"](exitErr);
       case "server":
         return this.runServer(options);
       case "openProject":
