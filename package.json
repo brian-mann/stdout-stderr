@@ -1,12 +1,13 @@
 {
   "scripts": {
-    "test": "node index.js && electron index.js"
+    "test": "node index.js && xvfb-maybe electron index.js"
   },
   "dependencies": {
     "debug": "^3.1.0",
     "electron": "^1.8.6",
     "execa": "^0.10.0",
     "log-symbols": "^2.2.0",
-    "supports-color": "^5.4.0"
+    "supports-color": "^5.4.0",
+    "xvfb-maybe": "^0.2.1"
   }
 }
