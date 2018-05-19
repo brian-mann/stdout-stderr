@@ -1,0 +1,181 @@
+var Promise, _, cp, debug, exit, exit0, exitErr, path;
+
+require("./environment");
+
+_ = require("lodash");
+
+cp = require("child_process");
+
+path = require("path");
+
+Promise = require("bluebird");
+
+debug = require('debug')('cypress:server:cypress');
+
+const supportsColor = require('supports-color')
+const symbols = require('log-symbols')
+
+console.log("process.type=", process.type)
+console.log("electron.version=", process.versions.electron)
+
+console.log('process.env.FORCE_COLOR=', process.env.FORCE_COLOR)
+
+debug('some debug output %o', { foo: 'bar', baz: true })
+
+console.log('i am stdout 1')
+console.error('i am stderror 1')
+
+console.log('i am stdout 2')
+console.error('i am stderror 2')
+
+console.log('stdout isatty', tty.isatty(1))
+console.log('stderr isatty', tty.isatty(2))
+
+console.log('stdout colors?', supportsColor.stdout)
+console.log('stderr colors?', supportsColor.stderr)
+
+console.log(symbols.info, 'info')
+console.log(symbols.success, 'success')
+console.log(symbols.error, 'error')
+console.log(symbols.warning, 'warning')
+
+exit = function(code) {
+  if (code == null) {
+    code = 0;
+  }
+  debug("about to exit with code", code);
+  return process.exit(code);
+};
+
+exit0 = function() {
+  return exit(0);
+};
+
+exitErr = function(err) {
+  debug('exiting with err', err);
+  return require("./errors").log(err).then(function() {
+    return exit(1);
+  });
+};
+
+module.exports = {
+  isCurrentlyRunningElectron: function() {
+    return !!(process.versions && process.versions.electron);
+  },
+  runElectron: function(mode, options) {
+    return Promise["try"]((function(_this) {
+      return function() {
+        if (_this.isCurrentlyRunningElectron()) {
+          return require("./modes")(mode, options);
+        } else {
+          return new Promise(function(resolve) {
+            var cypressElectron, fn;
+            cypressElectron = require("@packages/electron");
+            fn = function(code) {
+              debug("electron finished with", code);
+              return resolve({
+                totalFailures: code
+              });
+            };
+            return cypressElectron.open(".", require("./util/args").toArray(options), fn);
+          });
+        }
+      };
+    })(this));
+  },
+  openProject: function(options) {
+    return require("./open_project").open(options.project, options);
+  },
+  runServer: function(options) {},
+  start: function(argv) {
+    if (argv == null) {
+      argv = [];
+    }
+    require("./logger").info("starting desktop app", {
+      args: argv
+    });
+    return require("./util/app_data").ensure().then((function(_this) {
+      return function() {
+        var mode, options;
+        options = require("./util/args").toObject(argv);
+        switch (false) {
+          case !options.version:
+            options.mode = "version";
+            break;
+          case !options.smokeTest:
+            options.mode = "smokeTest";
+            break;
+          case !options.returnPkg:
+            options.mode = "returnPkg";
+            break;
+          case !options.logs:
+            options.mode = "logs";
+            break;
+          case !options.clearLogs:
+            options.mode = "clearLogs";
+            break;
+          case !options.getKey:
+            options.mode = "getKey";
+            break;
+          case !options.generateKey:
+            options.mode = "generateKey";
+            break;
+          case options.exitWithCode == null:
+            options.mode = "exitWithCode";
+            break;
+          case !options.runProject:
+            options.mode = "run";
+            break;
+          default:
+            if (options.mode == null) {
+              options.mode = "interactive";
+            }
+        }
+        mode = options.mode;
+        options = _.omit(options, "mode");
+        return _this.startInMode(mode, options);
+      };
+    })(this));
+  },
+  startInMode: function(mode, options) {
+    debug("start in mode %s with options %j", mode, options);
+    switch (mode) {
+      case "version":
+        return require("./modes/pkg")(options).get("version").then(function(version) {
+          return console.log(version);
+        }).then(exit0)["catch"](exitErr);
+      case "smokeTest":
+        return require("./modes/smoke_test")(options).then(function(pong) {
+          return console.log(pong);
+        }).then(exit0)["catch"](exitErr);
+      case "returnPkg":
+        return require("./modes/pkg")(options).then(function(pkg) {
+          return console.log(JSON.stringify(pkg));
+        }).then(exit0)["catch"](exitErr);
+      case "logs":
+        return require("./gui/logs").print().then(exit0)["catch"](exitErr);
+      case "clearLogs":
+        return require("./gui/logs").clear().then(exit0)["catch"](exitErr);
+      case "getKey":
+        return require("./project").getSecretKeyByPath(options.projectRoot).then(function(key) {
+          return console.log(key);
+        }).then(exit0)["catch"](exitErr);
+      case "generateKey":
+        return require("./project").generateSecretKeyByPath(options.projectRoot).then(function(key) {
+          return console.log(key);
+        }).then(exit0)["catch"](exitErr);
+      case "exitWithCode":
+        return require("./modes/exit")(options).then(exit)["catch"](exitErr);
+      case "run":
+        return this.runElectron(mode, options).get("totalFailures").then(exit)["catch"](exitErr);
+      case "interactive":
+        return this.runElectron(mode, options);
+      case "server":
+        return this.runServer(options);
+      case "openProject":
+        return this.openProject(options);
+      default:
+        throw new Error("Cannot start. Invalid mode: '" + mode + "'");
+    }
+  }
+};

@@ -1,12 +1,17 @@
 {
   "scripts": {
-    "test": "node index.js && xvfb-maybe electron index.js"
+    "pretest": "node copy.js",
+    "test": "mocha cypress/integration/foo.js; mocha cypress/integration/foo.js --reporter nyan; cypress run; cypress run --reporter nyan",
+    "test2": "mocha cypress/integration/foo.js && node index.js && xvfb-maybe electron index.js"
   },
   "dependencies": {
+    "cypress": "^2.1.0",
     "debug": "^3.1.0",
     "electron": "^1.8.6",
     "execa": "^0.10.0",
+    "fs-extra": "^6.0.1",
     "log-symbols": "^2.2.0",
+    "mocha": "^5.2.0",
     "supports-color": "^5.4.0",
     "xvfb-maybe": "^0.2.1"
   }

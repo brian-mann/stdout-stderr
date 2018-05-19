@@ -23,3 +23,5 @@ console.log(symbols.info, 'info')
 console.log(symbols.success, 'success')
 console.log(symbols.error, 'error')
 console.log(symbols.warning, 'warning')
+
+process.exit()
