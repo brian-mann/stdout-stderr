@@ -1,9 +1,12 @@
 const tty = require('tty')
 const execa = require('execa')
+const debug = require('debug')('stdout-stder-testing')
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
 
 console.log('process.env.FORCE_COLOR=', process.env.FORCE_COLOR)
+
+debug('some debug output %o', { foo: 'bar', baz: true })
 
 console.log('i am stdout 1')
 console.error('i am stderror 1')
