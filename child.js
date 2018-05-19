@@ -1,6 +1,9 @@
 const tty = require('tty')
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
+const debug = require('debug')('stdout-stderr-testing')
+
+debug('child debug output %o', { foo: 'bar', baz: true })
 
 console.log('********** CHILD *************')
 
