@@ -8,6 +8,6 @@ const nodeModules = path.resolve("node_modules")
 
 Promise.all([
   fse.copy(appPath, destPath),
-  fse.copy(path.join(nodeModules, "supports-color"), path.join(destPath, "packages", "server", "node_modules")),
-  fse.copy(path.join(nodeModules, "log-symbols"), path.join(destPath, "packages", "server", "node_modules"))
+  fse.copy(path.join(nodeModules, "supports-color"), path.join(destPath, "packages", "server", "node_modules", "supports-color")),
+  fse.copy(path.join(nodeModules, "log-symbols"), path.join(destPath, "packages", "server", "node_modules", "log-symbols"))
 ])

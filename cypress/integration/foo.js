@@ -6,7 +6,7 @@ it('fails', () => {
   throw new Error('fail whail')
 })
 
-Array(100).fill().forEach((n, i) => {
+Array(10).fill().forEach((n, i) => {
   it(`num: ${i+1}`, (done) => {
     setTimeout(done, 10)
   })
