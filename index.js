@@ -1,6 +1,8 @@
+process.env.DEBUG='stdout-stderr-testing'
+
 const tty = require('tty')
 const execa = require('execa')
-const debug = require('debug')('stdout-stder-testing')
+const debug = require('debug')('stdout-stderr-testing')
 const supportsColor = require('supports-color')
 const symbols = require('log-symbols')
 
