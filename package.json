@@ -1,5 +1,10 @@
 {
   "scripts": {
     "test": "node index.js"
+  },
+  "dependencies": {
+    "execa": "^0.10.0",
+    "log-symbols": "^2.2.0",
+    "supports-color": "^5.4.0"
   }
 }
